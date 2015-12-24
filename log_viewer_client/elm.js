@@ -12194,6 +12194,7 @@ Elm.LogService.make = function (_elm) {
    $Debug = Elm.Debug.make(_elm),
    $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
    $Http = Elm.Http.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
@@ -12205,15 +12206,17 @@ Elm.LogService.make = function (_elm) {
    $Task = Elm.Task.make(_elm);
    var _op = {};
    var decodeUrl = A2($Json$Decode.at,_U.list(["log"]),$Json$Decode.string);
+   var containerStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "width",_1: "100%"}]));
+   var logContainer = function (model) {
+      return A2($Html.div,_U.list([]),_U.list([A2($Html.textarea,_U.list([containerStyle]),_U.list([$Html.text($Basics.toString(model.logs))]))]));
+   };
    var RefreshData = function (a) {    return {ctor: "RefreshData",_0: a};};
    var getLogs = function (serviceUrl) {    return $Effects.task(A2($Task.map,RefreshData,$Task.toMaybe(A2($Http.get,decodeUrl,serviceUrl))));};
    var Refresh = {ctor: "Refresh"};
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.button,_U.list([A2($Html$Events.onClick,address,Refresh)]),_U.list([$Html.text("Refresh")]))
-              ,A2($Html.textarea,_U.list([]),_U.list([$Html.text($Basics.toString(model.logs))]))]));
+   var refreshButton = F2(function (address,model) {
+      return A2($Html.div,_U.list([]),_U.list([A2($Html.button,_U.list([A2($Html$Events.onClick,address,Refresh)]),_U.list([$Html.text("Refresh")]))]));
    });
+   var view = F2(function (address,model) {    return A2($Html.div,_U.list([]),_U.list([A2(refreshButton,address,model),logContainer(model)]));});
    var Model = F2(function (a,b) {    return {logs: a,serviceUrl: b};});
    var init = {ctor: "_Tuple2",_0: A2(Model,"","http://localhost:4000/show"),_1: $Effects.none};
    var update = F2(function (action,model) {
@@ -12234,6 +12237,9 @@ Elm.LogService.make = function (_elm) {
                                    ,RefreshData: RefreshData
                                    ,update: update
                                    ,view: view
+                                   ,refreshButton: refreshButton
+                                   ,logContainer: logContainer
+                                   ,containerStyle: containerStyle
                                    ,getLogs: getLogs
                                    ,decodeUrl: decodeUrl
                                    ,app: app

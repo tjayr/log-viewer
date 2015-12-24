@@ -72,20 +72,32 @@ update action model =
 view : Signal.Address Action -> Model -> Html
 view address model =
   div []
-    [ button 
-        [ onClick address Refresh ] 
-        [ text "Refresh" ],
-      textarea [] [text (toString model.logs)]
+    [ refreshButton address model 
+    , logContainer model
     ]
 
 
+refreshButton : Signal.Address Action -> Model -> Html
+refreshButton address model =
+    div []
+        [ button 
+            [ onClick address Refresh ] 
+            [ text "Refresh" ]
+        ]
 
---headerStyle : Attribute
---headerStyle =
---  style
---    [ "width" => "200px"
---    , "text-align" => "center"
---    ]
+logContainer : Model -> Html
+logContainer model = 
+    div [] 
+        [ textarea 
+            [containerStyle] 
+            [text (toString model.logs)]
+        ]
+
+containerStyle : Attribute
+containerStyle =
+  style
+    [ ("width" , "100%")    
+    ]
 
 
 --imgStyle : String -> Attribute
