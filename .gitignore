@@ -1,0 +1,23 @@
+# --------
+# Elm
+# -------
+# elm-package generated files
+elm-stuff/
+# elm-repl generated files
+repl-temp-*
+
+# ---------
+# Elxiir
+# ---------
+/_build
+/cover
+/deps
+erl_crash.dump
+*.ez
+
+
+.idea
+*.iml
+*.ipr
+*.class
+
