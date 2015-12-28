@@ -10,6 +10,7 @@ import Task
 import StartApp
 import Json.Decode exposing ((:=))
 import LogDecoder
+import Date
 
 
 -- MODEL
@@ -93,7 +94,7 @@ logDiv event =
     div 
     [ style [("border-bottom", "1px solid black")]
     ]     
-    [ text (toString event.timestamp)
+    [ text (toString <| Date.fromTime <| toFloat event.timestamp)
     , text ("Level " ++ event.level)
     , text ("Message: " ++ event.message)
     ]
