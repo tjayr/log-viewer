@@ -1,35 +1,42 @@
 module LogService where
 
+import LogModel exposing (..)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
-import Json.Decode as Json
 import Task
 import StartApp
+import Json.Decode exposing ((:=))
+import LogDecoder
 
 
 -- MODEL
 
-type alias Model =
-    { logs : String
-    , serviceUrl : String
-    }
-
-
+{-| The init function creates an empty model representation for when the application loads up.
+-}
 init : (Model, Effects Action)
 init =
-  ( Model "" "http://localhost:4000/show"
+  ( Model defaultListOfLogEvent "http://localhost:8080/logViewer"
   , Effects.none
   )
 
+{-| This function creates an empty list of LogEvent for use by the init function.
+    note the LogEvent takes 13 parameters - this is a record constructor. 
+    Syntaicatly its very similar and for all intents and purposes does the same job as 
+    a constructor in an OO language.
+-}
+defaultListOfLogEvent : List LogEvent
+defaultListOfLogEvent = 
+    [LogEvent 0 "" "" "" "" "" "" "" "" "" "" "" ""]
+    
 
 -- UPDATE
 
 type Action
     = Refresh 
-    | RefreshData (Maybe String)
+    | RefreshData (Maybe (List LogEvent))
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -37,37 +44,16 @@ update action model =
   case action of
     Refresh ->
         ( model, getLogs model.serviceUrl)
-    RefreshData data ->
-        ( Model (Maybe.withDefault "none" data) model.serviceUrl
-        , Effects.none
-        )      
+    RefreshData data ->    
+        let
+            refreshedEvents =  (Maybe.withDefault defaultListOfLogEvent data)
+            newEvents = model.logs ++ refreshedEvents
+        in
+            ( Model newEvents model.serviceUrl
+            , Effects.none
+            )      
 
-
---update : Action -> Model -> (Model, Effects Action)
---update action model =
---  case action of
---    RequestMore ->
---      (model, getRandomGif model.topic)
-
---    NewGif maybeUrl ->
---      ( Model model.topic (Maybe.withDefault model.gifUrl maybeUrl)
---      , Effects.none
---      )      
-
-
--- VIEW
-
---(=>) = (,)
-
-
---view : Signal.Address Action -> Model -> Html
---view address model =
---  div [ style [ "width" => "200px" ] ]
---    [ h2 [headerStyle] [text model.topic]
---    , div [imgStyle model.gifUrl] []
---    , button [ onClick address RequestMore ] [ text "More Please!" ]
---    ]
-
+-- VIEWS
 
 view : Signal.Address Action -> Model -> Html
 view address model =
@@ -87,44 +73,41 @@ refreshButton address model =
 
 logContainer : Model -> Html
 logContainer model = 
-    div [] 
-        [ textarea 
-            [containerStyle] 
-            [text (toString model.logs)]
-        ]
+    div [] (eventListToString model)
+      
 
 containerStyle : Attribute
 containerStyle =
   style
-    [ ("width" , "100%")    
+    [ ("width" , "80%")    
     ]
 
 
---imgStyle : String -> Attribute
---imgStyle url =
---  style
---    [ "display" => "inline-block"
---    , "width" => "200px"
---    , "height" => "200px"
---    , "background-position" => "center center"
---    , "background-size" => "cover"
---    , "background-image" => ("url('" ++ url ++ "')")
---    ]
+eventListToString: Model -> List Html
+eventListToString model = 
+    List.map (\e -> logDiv e) model.logs     
+
+
+logDiv : LogEvent -> Html
+logDiv event =
+    div 
+    [ style [("border-bottom", "1px solid black")]
+    ]     
+    [ text (toString event.timestamp)
+    , text ("Level " ++ event.level)
+    , text ("Message: " ++ event.message)
+    ]
 
 
 -- EFFECTS
 
 getLogs : String -> Effects Action
 getLogs serviceUrl =
-  Http.get decodeUrl serviceUrl    
+  Http.get (Json.Decode.list LogDecoder.decodeEvent) serviceUrl
     |> Task.toMaybe    
     |> Task.map RefreshData
     |> Effects.task
 
-
-decodeUrl : Json.Decoder String
-decodeUrl =
-  Json.at ["log"] Json.string
 
 
 app =

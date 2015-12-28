@@ -37,7 +37,7 @@ config :phoenix, :stacktrace_depth, 20
 config :log_viewer, LogViewer.Repo,
   adapter: Ecto.Adapters.MySQL,
   username: "root",
-  password: "",
-  database: "log_viewer_dev",
+  password: "admin",
+  database: "gurudev",
   hostname: "localhost",
   pool_size: 10
