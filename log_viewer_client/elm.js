@@ -9244,6 +9244,169 @@ Elm.Json.Decode.make = function (_elm) {
                                     ,value: value
                                     ,customDecoder: customDecoder};
 };
+Elm.Native.Regex = {};
+Elm.Native.Regex.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Regex = localRuntime.Native.Regex || {};
+	if (localRuntime.Native.Regex.values)
+	{
+		return localRuntime.Native.Regex.values;
+	}
+	if ('values' in Elm.Native.Regex)
+	{
+		return localRuntime.Native.Regex.values = Elm.Native.Regex.values;
+	}
+
+	var List = Elm.Native.List.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+
+	function escape(str)
+	{
+		return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+	}
+	function caseInsensitive(re)
+	{
+		return new RegExp(re.source, 'gi');
+	}
+	function regex(raw)
+	{
+		return new RegExp(raw, 'g');
+	}
+
+	function contains(re, string)
+	{
+		return string.match(re) !== null;
+	}
+
+	function find(n, re, str)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		var out = [];
+		var number = 0;
+		var string = str;
+		var lastIndex = re.lastIndex;
+		var prevLastIndex = -1;
+		var result;
+		while (number++ < n && (result = re.exec(string)))
+		{
+			if (prevLastIndex === re.lastIndex) break;
+			var i = result.length - 1;
+			var subs = new Array(i);
+			while (i > 0)
+			{
+				var submatch = result[i];
+				subs[--i] = submatch === undefined
+					? Maybe.Nothing
+					: Maybe.Just(submatch);
+			}
+			out.push({
+				match: result[0],
+				submatches: List.fromArray(subs),
+				index: result.index,
+				number: number
+			});
+			prevLastIndex = re.lastIndex;
+		}
+		re.lastIndex = lastIndex;
+		return List.fromArray(out);
+	}
+
+	function replace(n, re, replacer, string)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		var count = 0;
+		function jsReplacer(match)
+		{
+			if (count++ >= n)
+			{
+				return match;
+			}
+			var i = arguments.length - 3;
+			var submatches = new Array(i);
+			while (i > 0)
+			{
+				var submatch = arguments[i];
+				submatches[--i] = submatch === undefined
+					? Maybe.Nothing
+					: Maybe.Just(submatch);
+			}
+			return replacer({
+				match: match,
+				submatches: List.fromArray(submatches),
+				index: arguments[i - 1],
+				number: count
+			});
+		}
+		return string.replace(re, jsReplacer);
+	}
+
+	function split(n, re, str)
+	{
+		n = n.ctor === 'All' ? Infinity : n._0;
+		if (n === Infinity)
+		{
+			return List.fromArray(str.split(re));
+		}
+		var string = str;
+		var result;
+		var out = [];
+		var start = re.lastIndex;
+		while (n--)
+		{
+			if (!(result = re.exec(string))) break;
+			out.push(string.slice(start, result.index));
+			start = re.lastIndex;
+		}
+		out.push(string.slice(start));
+		return List.fromArray(out);
+	}
+
+	return Elm.Native.Regex.values = {
+		regex: regex,
+		caseInsensitive: caseInsensitive,
+		escape: escape,
+
+		contains: F2(contains),
+		find: F3(find),
+		replace: F4(replace),
+		split: F3(split)
+	};
+};
+
+Elm.Regex = Elm.Regex || {};
+Elm.Regex.make = function (_elm) {
+   "use strict";
+   _elm.Regex = _elm.Regex || {};
+   if (_elm.Regex.values) return _elm.Regex.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Regex = Elm.Native.Regex.make(_elm);
+   var _op = {};
+   var split = $Native$Regex.split;
+   var replace = $Native$Regex.replace;
+   var find = $Native$Regex.find;
+   var AtMost = function (a) {    return {ctor: "AtMost",_0: a};};
+   var All = {ctor: "All"};
+   var Match = F4(function (a,b,c,d) {
+      return {match: a,submatches: b,index: c,number: d};
+   });
+   var contains = $Native$Regex.contains;
+   var caseInsensitive = $Native$Regex.caseInsensitive;
+   var regex = $Native$Regex.regex;
+   var escape = $Native$Regex.escape;
+   var Regex = {ctor: "Regex"};
+   return _elm.Regex.values = {_op: _op
+                              ,regex: regex
+                              ,escape: escape
+                              ,caseInsensitive: caseInsensitive
+                              ,contains: contains
+                              ,find: find
+                              ,replace: replace
+                              ,split: split
+                              ,Match: Match
+                              ,All: All
+                              ,AtMost: AtMost};
+};
 Elm.Native.Effects = {};
 Elm.Native.Effects.make = function(localRuntime) {
 
@@ -12297,6 +12460,101 @@ Elm.StartApp.make = function (_elm) {
                                  ,Config: Config
                                  ,App: App};
 };
+Elm.Date = Elm.Date || {};
+Elm.Date.Format = Elm.Date.Format || {};
+Elm.Date.Format.make = function (_elm) {
+   "use strict";
+   _elm.Date = _elm.Date || {};
+   _elm.Date.Format = _elm.Date.Format || {};
+   if (_elm.Date.Format.values) return _elm.Date.Format.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Date = Elm.Date.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Regex = Elm.Regex.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm);
+   var _op = {};
+   var padWith = function (c) {    return function (_p0) {    return A3($String.padLeft,2,c,$Basics.toString(_p0));};};
+   var mod12 = function (h) {    return A2($Basics._op["%"],h,12);};
+   var fullDayOfWeek = function (dow) {
+      var _p1 = dow;
+      switch (_p1.ctor)
+      {case "Mon": return "Monday";
+         case "Tue": return "Tuesday";
+         case "Wed": return "Wednesday";
+         case "Thu": return "Thursday";
+         case "Fri": return "Friday";
+         case "Sat": return "Saturday";
+         default: return "Sunday";}
+   };
+   var monthToFullName = function (m) {
+      var _p2 = m;
+      switch (_p2.ctor)
+      {case "Jan": return "January";
+         case "Feb": return "February";
+         case "Mar": return "March";
+         case "Apr": return "April";
+         case "May": return "May";
+         case "Jun": return "June";
+         case "Jul": return "July";
+         case "Aug": return "August";
+         case "Sep": return "September";
+         case "Oct": return "October";
+         case "Nov": return "November";
+         default: return "December";}
+   };
+   var monthToInt = function (m) {
+      var _p3 = m;
+      switch (_p3.ctor)
+      {case "Jan": return 1;
+         case "Feb": return 2;
+         case "Mar": return 3;
+         case "Apr": return 4;
+         case "May": return 5;
+         case "Jun": return 6;
+         case "Jul": return 7;
+         case "Aug": return 8;
+         case "Sep": return 9;
+         case "Oct": return 10;
+         case "Nov": return 11;
+         default: return 12;}
+   };
+   var collapse = function (m) {    return A2($Maybe.andThen,m,$Basics.identity);};
+   var formatToken = F2(function (d,m) {
+      var symbol = A2($Maybe.withDefault," ",collapse(A2($Maybe.andThen,$List.tail(m.submatches),$List.head)));
+      var prefix = A2($Maybe.withDefault," ",collapse($List.head(m.submatches)));
+      return A2($Basics._op["++"],
+      prefix,
+      function () {
+         var _p4 = symbol;
+         switch (_p4)
+         {case "Y": return $Basics.toString($Date.year(d));
+            case "m": return A3($String.padLeft,2,_U.chr("0"),$Basics.toString(monthToInt($Date.month(d))));
+            case "B": return monthToFullName($Date.month(d));
+            case "b": return $Basics.toString($Date.month(d));
+            case "d": return A2(padWith,_U.chr("0"),$Date.day(d));
+            case "e": return A2(padWith,_U.chr(" "),$Date.day(d));
+            case "a": return $Basics.toString($Date.dayOfWeek(d));
+            case "A": return fullDayOfWeek($Date.dayOfWeek(d));
+            case "H": return A2(padWith,_U.chr("0"),$Date.hour(d));
+            case "k": return A2(padWith,_U.chr(" "),$Date.hour(d));
+            case "I": return A2(padWith,_U.chr("0"),mod12($Date.hour(d)));
+            case "l": return A2(padWith,_U.chr(" "),mod12($Date.hour(d)));
+            case "p": return _U.cmp($Date.hour(d),13) < 0 ? "AM" : "PM";
+            case "P": return _U.cmp($Date.hour(d),13) < 0 ? "am" : "pm";
+            case "M": return A2(padWith,_U.chr("0"),$Date.minute(d));
+            case "S": return A2(padWith,_U.chr("0"),$Date.second(d));
+            default: return "";}
+      }());
+   });
+   var re = $Regex.regex("(^|[^%])%(Y|m|B|b|d|e|a|A|H|k|I|l|p|P|M|S)");
+   var format = F2(function (s,d) {    return A4($Regex.replace,$Regex.All,re,formatToken(d),s);});
+   return _elm.Date.Format.values = {_op: _op,format: format};
+};
 Elm.LogModel = Elm.LogModel || {};
 Elm.LogModel.make = function (_elm) {
    "use strict";
@@ -12403,6 +12661,7 @@ Elm.LogService.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Date = Elm.Date.make(_elm),
+   $Date$Format = Elm.Date.Format.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
@@ -12419,37 +12678,94 @@ Elm.LogService.make = function (_elm) {
    $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm);
    var _op = {};
+   var logTableHeader = A2($Html.tr,
+   _U.list([]),
+   _U.list([A2($Html.td,_U.list([]),_U.list([$Html.text("Timestamp")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Level")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Message")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Thread")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Filename")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Class")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Method")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Line")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Arg 0")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Arg 1")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Arg 2")]))
+           ,A2($Html.td,_U.list([]),_U.list([$Html.text("Arg 3")]))]));
    var logDiv = function (event) {
       return A2($Html.div,
       _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "border-bottom",_1: "1px solid black"}]))]),
-      _U.list([$Html.text($Basics.toString($Date.fromTime($Basics.toFloat(event.timestamp))))
+      _U.list([$Html.text(A2($Date$Format.format,"%Y-%m-%d %I:%M:%S",$Date.fromTime($Basics.toFloat(event.timestamp))))
               ,$Html.text(A2($Basics._op["++"],"Level ",event.level))
               ,$Html.text(A2($Basics._op["++"],"Message: ",event.message))]));
    };
    var eventListToString = function (model) {    return A2($List.map,function (e) {    return logDiv(e);},model.logs);};
+   var warningStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "background",_1: "#FF8C00"}]));
+   var errorStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "background",_1: "#B22222"}
+                                                   ,{ctor: "_Tuple2",_0: "color",_1: "#ffe"}
+                                                   ,{ctor: "_Tuple2",_0: "font-weight",_1: "500"}]));
+   var debugStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "background",_1: "#006600"},{ctor: "_Tuple2",_0: "color",_1: "#ffe"}]));
+   var plainStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "background",_1: "#ffe"}]));
+   var selectStyle = function (event) {
+      var _p0 = event.level;
+      switch (_p0)
+      {case "DEBUG": return debugStyle;
+         case "WARN": return warningStyle;
+         case "ERROR": return errorStyle;
+         default: return plainStyle;}
+   };
+   var logTableRow = function (event) {
+      return A2($Html.tr,
+      _U.list([selectStyle(event)]),
+      _U.list([A2($Html.td,_U.list([]),_U.list([$Html.text(A2($Date$Format.format,"%Y-%m-%d %I:%M:%S",$Date.fromTime($Basics.toFloat(event.timestamp))))]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.level)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.message)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.thread)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.callerfilename)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.callerClass)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.callerMethod)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.callerLine)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.arg0)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.arg1)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.arg2)]))
+              ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.arg3)]))]));
+   };
+   var logTable = function (events) {    return A2($Html.table,_U.list([]),A2($Basics._op["++"],_U.list([logTableHeader]),A2($List.map,logTableRow,events)));};
+   var globalStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "background",_1: "#ffe"}
+                                                    ,{ctor: "_Tuple2",_0: "font-size",_1: "11px"}
+                                                    ,{ctor: "_Tuple2",_0: "font-family",_1: "Verdana, sans-serif"}]));
    var containerStyle = $Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "width",_1: "80%"}]));
-   var logContainer = function (model) {    return A2($Html.div,_U.list([]),eventListToString(model));};
+   var logContainer = function (model) {    return A2($Html.div,_U.list([]),_U.list([logTable(model.logs)]));};
+   var UpdateUrl = function (a) {    return {ctor: "UpdateUrl",_0: a};};
    var RefreshData = function (a) {    return {ctor: "RefreshData",_0: a};};
    var getLogs = function (serviceUrl) {
       return $Effects.task(A2($Task.map,RefreshData,$Task.toMaybe(A2($Http.get,$Json$Decode.list($LogDecoder.decodeEvent),serviceUrl))));
    };
    var Refresh = {ctor: "Refresh"};
    var refreshButton = F2(function (address,model) {
-      return A2($Html.div,_U.list([]),_U.list([A2($Html.button,_U.list([A2($Html$Events.onClick,address,Refresh)]),_U.list([$Html.text("Refresh")]))]));
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.button,_U.list([A2($Html$Events.onClick,address,Refresh)]),_U.list([$Html.text("Refresh")]))
+              ,$Html.text("Service URL")
+              ,A2($Html.input,
+              _U.list([$Html$Attributes.id("service-url")
+                      ,$Html$Attributes.type$("text")
+                      ,$Html$Attributes.value(model.serviceUrl)
+                      ,A3($Html$Events.on,"input",$Html$Events.targetValue,function (str) {    return A2($Signal.message,address,UpdateUrl(str));})]),
+              _U.list([]))]));
    });
-   var view = F2(function (address,model) {    return A2($Html.div,_U.list([]),_U.list([A2(refreshButton,address,model),logContainer(model)]));});
+   var view = F2(function (address,model) {    return A2($Html.div,_U.list([globalStyle]),_U.list([A2(refreshButton,address,model),logContainer(model)]));});
    var defaultListOfLogEvent = _U.list([$LogModel.LogEvent(0)("")("")("")("")("")("")("")("")("")("")("")("")]);
    var update = F2(function (action,model) {
-      var _p0 = action;
-      if (_p0.ctor === "Refresh") {
-            return {ctor: "_Tuple2",_0: model,_1: getLogs(model.serviceUrl)};
-         } else {
-            var refreshedEvents = A2($Maybe.withDefault,defaultListOfLogEvent,_p0._0);
-            var newEvents = A2($Basics._op["++"],model.logs,refreshedEvents);
-            return {ctor: "_Tuple2",_0: A2($LogModel.Model,newEvents,model.serviceUrl),_1: $Effects.none};
-         }
+      var _p1 = action;
+      switch (_p1.ctor)
+      {case "Refresh": return {ctor: "_Tuple2",_0: model,_1: getLogs(model.serviceUrl)};
+         case "RefreshData": var refreshedEvents = A2($Maybe.withDefault,defaultListOfLogEvent,_p1._0);
+           var newEvents = A2($Basics._op["++"],refreshedEvents,model.logs);
+           return {ctor: "_Tuple2",_0: A2($LogModel.Model,newEvents,model.serviceUrl),_1: $Effects.none};
+         default: return {ctor: "_Tuple2",_0: _U.update(model,{logs: model.logs,serviceUrl: _p1._0}),_1: $Effects.none};}
    });
-   var init = {ctor: "_Tuple2",_0: A2($LogModel.Model,defaultListOfLogEvent,"http://localhost:8080/logViewer"),_1: $Effects.none};
+   var init = {ctor: "_Tuple2",_0: A2($LogModel.Model,defaultListOfLogEvent,"http://localhost:<port>/logViewer"),_1: $Effects.none};
    var app = $StartApp.start({init: init,update: update,view: view,inputs: _U.list([])});
    var main = app.html;
    var tasks = Elm.Native.Task.make(_elm).performSignal("tasks",app.tasks);
@@ -12458,13 +12774,23 @@ Elm.LogService.make = function (_elm) {
                                    ,defaultListOfLogEvent: defaultListOfLogEvent
                                    ,Refresh: Refresh
                                    ,RefreshData: RefreshData
+                                   ,UpdateUrl: UpdateUrl
                                    ,update: update
                                    ,view: view
                                    ,refreshButton: refreshButton
                                    ,logContainer: logContainer
                                    ,containerStyle: containerStyle
+                                   ,globalStyle: globalStyle
+                                   ,plainStyle: plainStyle
+                                   ,debugStyle: debugStyle
+                                   ,errorStyle: errorStyle
+                                   ,warningStyle: warningStyle
+                                   ,selectStyle: selectStyle
                                    ,eventListToString: eventListToString
                                    ,logDiv: logDiv
+                                   ,logTable: logTable
+                                   ,logTableHeader: logTableHeader
+                                   ,logTableRow: logTableRow
                                    ,getLogs: getLogs
                                    ,app: app
                                    ,main: main};

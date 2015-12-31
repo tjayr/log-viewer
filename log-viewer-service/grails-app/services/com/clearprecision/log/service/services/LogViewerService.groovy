@@ -13,21 +13,6 @@ class LogViewerService {
     def getLogs() {
         def logs = LoggingEvent.list()
 
-//        Long timestmp
-//        String formattedMessage
-//        String loggerName
-//        String levelString
-//        String threadName
-//        Short referenceFlag
-//        String arg0
-//        String arg1
-//        String arg2
-//        String arg3
-//        String callerFilename
-//        String callerClass
-//        String callerMethod
-//        String callerLine
-
         logs.collect { event ->
           [timestamp: event.timestmp, message: event.formattedMessage, loggerName: event.loggerName,
                 level: event.levelString, thread: event.threadName, callerClass: event.callerClass,
