@@ -1,0 +1,20 @@
+module Logger where
+
+import Data.HashMap exposing (..)
+import Data.Maybe exposing (..)
+
+--- Documentation for greeting
+greeting = "Hello Frege"
+
+
+logMessages = HashMap.fromList
+  [ ("ERROR", "An error has occurred see stack trace for details")
+  , ("INFO", "The system is starting up")
+  , ("WARN", "Unable to find database driver, falling back to file system storage")
+  , ("DEBUG", "System processed 10008 events, in 0.67 seconds")
+  ]
+
+
+
+main _ = do
+    println greeting
