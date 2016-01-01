@@ -12678,6 +12678,11 @@ Elm.LogService.make = function (_elm) {
    $StartApp = Elm.StartApp.make(_elm),
    $Task = Elm.Task.make(_elm);
    var _op = {};
+   var logDateFormat = function (date) {
+      var milliseconds = $Basics.toString($Date.millisecond(date));
+      var fdate = A2($Date$Format.format,"%Y-%m-%d %I:%M:%S",date);
+      return A2($Basics._op["++"],fdate,A2($Basics._op["++"],":",milliseconds));
+   };
    var logTableHeader = A2($Html.tr,
    _U.list([]),
    _U.list([A2($Html.td,_U.list([]),_U.list([$Html.text("Timestamp")]))
@@ -12717,7 +12722,7 @@ Elm.LogService.make = function (_elm) {
    var logTableRow = function (event) {
       return A2($Html.tr,
       _U.list([selectStyle(event)]),
-      _U.list([A2($Html.td,_U.list([]),_U.list([$Html.text(A2($Date$Format.format,"%Y-%m-%d %I:%M:%S",$Date.fromTime($Basics.toFloat(event.timestamp))))]))
+      _U.list([A2($Html.td,_U.list([]),_U.list([$Html.text(logDateFormat($Date.fromTime($Basics.toFloat(event.timestamp))))]))
               ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.level)]))
               ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.message)]))
               ,A2($Html.td,_U.list([]),_U.list([$Html.text(event.thread)]))
@@ -12791,6 +12796,7 @@ Elm.LogService.make = function (_elm) {
                                    ,logTable: logTable
                                    ,logTableHeader: logTableHeader
                                    ,logTableRow: logTableRow
+                                   ,logDateFormat: logDateFormat
                                    ,getLogs: getLogs
                                    ,app: app
                                    ,main: main};

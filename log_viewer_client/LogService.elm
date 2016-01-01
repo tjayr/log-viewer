@@ -189,7 +189,7 @@ logTableHeader =
 logTableRow : LogEvent -> Html    
 logTableRow event = 
     tr [ selectStyle event ] 
-    [ td [] [ text (Date.Format.format "%Y-%m-%d %I:%M:%S" <| Date.fromTime <| toFloat event.timestamp)]
+    [ td [] [ text (logDateFormat <| Date.fromTime <| toFloat event.timestamp)] --Date.Format.format "%Y-%m-%d %I:%M:%S"
     , td [] [ text event.level ]
     , td [] [ text event.message ]
     , td [] [ text event.thread ]
@@ -202,6 +202,15 @@ logTableRow event =
     , td [] [ text event.arg2 ]
     , td [] [ text event.arg3 ]
     ]
+
+
+
+logDateFormat date = 
+    let 
+        fdate = Date.Format.format "%Y-%m-%d %I:%M:%S" date
+        milliseconds =  Date.millisecond date |> toString 
+    in
+        fdate ++ ":" ++ milliseconds
 
 
 
