@@ -1,12 +1,11 @@
 module Logger where
 
-import Data.HashMap exposing (..)
-import Data.Maybe exposing (..)
+import Data.HashMap
+import Data.Maybe
 
 --- Documentation for greeting
-greeting = "Hello Frege"
 
-
+logMessages :: HashMap String String
 logMessages = HashMap.fromList
   [ ("ERROR", "An error has occurred see stack trace for details")
   , ("INFO", "The system is starting up")
@@ -16,5 +15,6 @@ logMessages = HashMap.fromList
 
 
 
+
 main _ = do
-    println greeting
+    println (HashMap.lookupDefault "Default Error" "ERROR" logMessages)
