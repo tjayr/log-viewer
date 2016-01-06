@@ -12767,7 +12767,7 @@ Elm.LogService.make = function (_elm) {
       {case "Refresh": return {ctor: "_Tuple2",_0: model,_1: getLogs(model.serviceUrl)};
          case "RefreshData": var refreshedEvents = A2($Maybe.withDefault,defaultListOfLogEvent,_p1._0);
            var newEvents = A2($Basics._op["++"],refreshedEvents,model.logs);
-           return {ctor: "_Tuple2",_0: A2($LogModel.Model,newEvents,model.serviceUrl),_1: $Effects.none};
+           return {ctor: "_Tuple2",_0: _U.update(model,{logs: newEvents,serviceUrl: model.serviceUrl}),_1: $Effects.none};
          default: return {ctor: "_Tuple2",_0: _U.update(model,{logs: model.logs,serviceUrl: _p1._0}),_1: $Effects.none};}
    });
    var init = {ctor: "_Tuple2",_0: A2($LogModel.Model,defaultListOfLogEvent,"http://localhost:<port>/logViewer"),_1: $Effects.none};

@@ -52,15 +52,11 @@ update action model =
             refreshedEvents =  (Maybe.withDefault defaultListOfLogEvent data)
             newEvents = refreshedEvents ++ model.logs               
         in
-            ( Model newEvents model.serviceUrl
+            ( { model | logs = newEvents, serviceUrl = model.serviceUrl }
             , Effects.none
             )
     UpdateUrl newServiceUrl ->
-        ( { model | 
-                logs = model.logs
-                , serviceUrl = newServiceUrl
-
-            }            
+        ( { model | logs = model.logs, serviceUrl = newServiceUrl }
         , Effects.none
         )
         
