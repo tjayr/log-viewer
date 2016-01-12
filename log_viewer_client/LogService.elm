@@ -163,9 +163,9 @@ logTable events =
     table [] ( [(logTableHeader)] ++ (List.map logTableRow events) )
 
 
-logTableHeader : Html    
+logTableHeader : Html
 logTableHeader =
-    tr [] 
+    tr []
     [ td [] [text "Timestamp"]
     , td [] [text "Level"]
     , td [] [text "Message"]
@@ -178,13 +178,12 @@ logTableHeader =
     , td [] [text "Arg 1"]
     , td [] [text "Arg 2"]
     , td [] [text "Arg 3"]
-    ]                 
+    ]
 
-    
 
-logTableRow : LogEvent -> Html    
-logTableRow event = 
-    tr [ selectStyle event ] 
+logTableRow : LogEvent -> Html
+logTableRow event =
+    tr [ selectStyle event ]
     [ td [] [ text (logDateFormat <| Date.fromTime <| toFloat event.timestamp)] --Date.Format.format "%Y-%m-%d %I:%M:%S"
     , td [] [ text event.level ]
     , td [] [ text event.message ]
