@@ -24,14 +24,14 @@ public class SiteStatusVerticle extends AbstractVerticle {
 
         System.out.println("Starting");
         HttpClientOptions options = new HttpClientOptions()
-                .setKeepAlive(false).setDefaultHost(host).setDefaultPort(8080);
+                .setKeepAlive(false).setDefaultHost(host).setDefaultPort(7080);
         HttpClient httpClient = vertx.createHttpClient(options);
 
         vertx.setPeriodic(sleep, handler -> {
             System.out.println("check");
-            httpClient.getNow("/info", event -> {
+            httpClient.getNow("/", event -> {
                 System.out.println("Status: " + event.statusCode());
-                vertx.eventBus().send("siteStatus", event.statusMessage());
+                vertx.eventBus().publish("siteStatus", event.statusMessage());
             });
         });
     }

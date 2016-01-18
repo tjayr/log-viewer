@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+
+    <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
+    <script src='vertx-eventbus.js'></script>
+
+    <script>
+
+        var eb = new EventBus('http://localhost:8082/eventbus/*');
+
+        console.log("Test")
+
+        eb.onopen = function() {
+
+            // set a handler to receive a message
+            eb.registerHandler('siteStatus', function(message) {
+                console.log('received a message:');
+            });
+
+        }
+
+    </script>
+
+</head>
+<body>
+
+Open JS Console
+
+</body>
+</html>
