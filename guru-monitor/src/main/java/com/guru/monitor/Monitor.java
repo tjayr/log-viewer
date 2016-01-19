@@ -10,6 +10,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
+import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 
@@ -26,7 +27,6 @@ public class Monitor {
     public void start() {
         vertx = Vertx.vertx();
         startWorkers();
-        startRoutes();
     }
 
     private void startWorkers(){
@@ -44,30 +44,6 @@ public class Monitor {
         });
 
     }
-
-
-    private void startRoutes() {
-        Router router = Router.router(vertx);
-
-        CorsHandler corsHandler = CorsHandler.create("*");
-        corsHandler.allowedMethod(HttpMethod.GET);
-        corsHandler.allowedMethod(HttpMethod.POST);
-        corsHandler.allowedMethod(HttpMethod.PUT);
-        corsHandler.allowedMethod(HttpMethod.DELETE);
-        corsHandler.allowedHeader("Authorization");
-        corsHandler.allowedHeader("Content-Type");
-
-        router.route("/eventbus/*").handler(corsHandler);
-
-
-        SockJSHandler sockJSHandler = SockJSHandler.create(vertx);
-        BridgeOptions options = new BridgeOptions();
-        sockJSHandler.bridge(options);
-
-        router.route("/eventbus/*").handler(sockJSHandler);
-
-    }
-
 
     public static void main(String[] args) {
         Monitor monitor = new Monitor();

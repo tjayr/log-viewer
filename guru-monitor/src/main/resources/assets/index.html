@@ -5,14 +5,12 @@
     <title></title>
 
 
-    <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
+    <script src="//cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
     <script src='vertx-eventbus.js'></script>
 
     <script>
-
-        var eb = new EventBus('http://localhost:8082/eventbus/*');
-
-        console.log("Test")
+        console.log("Test");
+        var eb = new EventBus('http://localhost:8082/eventbus');
 
         eb.onopen = function() {
 

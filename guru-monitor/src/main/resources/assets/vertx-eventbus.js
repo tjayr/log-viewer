@@ -83,13 +83,7 @@
     this.defaultHeaders = null;
 
     // default event handlers
-    this.onerror = function (err) {
-      try {
-        console.error(err);
-      } catch (e) {
-        // dev tools are disabled so we cannot use console on IE
-      }
-    };
+    this.onerror = console.error;
 
     var sendPing = function () {
       self.sockJSConn.send(JSON.stringify({type: 'ping'}));
@@ -144,11 +138,7 @@
         if (json.type === 'err') {
           self.onerror(json);
         } else {
-          try {
-            console.warn('No handler found for message: ', json);
-          } catch (e) {
-            // dev tools are disabled so we cannot use console on IE
-          }
+          console.warn('No handler found for message: ', json);
         }
       }
     }
@@ -285,7 +275,7 @@
    * Closes the connection to the EvenBus Bridge.
    */
   EventBus.prototype.close = function () {
-    this.state = EventBus.CLOSING;
+    this.state = vertx.EventBus.CLOSING;
     this.sockJSConn.close();
   };
 
